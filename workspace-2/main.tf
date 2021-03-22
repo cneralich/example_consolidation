@@ -1,15 +1,19 @@
-data "terraform_remote_state" "output_test" {
-  backend = "atlas"
+data "terraform_remote_state" "vpc" {
+  backend = "remote"
+
   config = {
-    name = "GE-Vault-Deployment-Service/test-workspace"
+    organization = "my-org"
+    workspaces = {
+      name = "workspace-networking"
+    }
   }
 }
 
 resource "random_pet" "server" {
   keepers = {
-    uuid = "${uuid()}"
+    uuid = data.terraform_remote_state.vpc.outputs.cidr
   }
 
   length = "${var.pet_name_length}"
-  prefix = data.terraform_remote_state.output_test.outputs.server
+  prefix = data.terraform_remote_state.vpc.outputs.vpc_id
 }
